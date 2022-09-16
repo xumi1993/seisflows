@@ -132,8 +132,8 @@ class Singularity(Workstation):
         :return: the system-dependent portion of a run call
         """
         return (f"{self.singularity_exec} exec -c "
-                f"--bind $(pwd):/work {self.path.container} "
-                f"bash -c 'cd /work;")
+                f"--bind $(pwd) {self.path.container} "
+                f"bash -c 'cd {os.path.relpath(self.path.workdir)};")
 
     def submit(self, workdir=None, parameter_file="parameters.yaml"):
         """
@@ -184,11 +184,12 @@ class Singularity(Workstation):
 
         # Create the run call which will simply call an external Python script
         # e.g., run --funcs func.p --kwargs kwargs.p --environment ...
+        # !!! Relative paths are muy importante
         run_call = " ".join([
             f"{self.run_call_header}",
-            f"{self.path.run}",
-            f"--funcs {funcs_fid}",
-            f"--kwargs {kwargs_fid}",
+            f"{os.path.relpath(self.path.run)}",
+            f"--funcs {os.path.relpath(funcs_fid)}",
+            f"--kwargs {os.path.relpath(kwargs_fid)}",
             f"--environment {self.environs}"
             f"'"  # <- important, closes the bash command started in header
         ])
@@ -204,7 +205,8 @@ class Singularity(Workstation):
             f.write("#!/bin/bash -e\n")  # shebang
             f.write(run_call)
 
-        input(msg.cli(f"sh {os.path.relpath(runscript)}",
+        # !!! using sbatch but that's not very general, should change also
+        input(msg.cli(f"sbatch {os.path.relpath(runscript)}",
                       header="task run call", border="=",
                       items=["> please execute the above command",
                              "> hit `enter` when all jobs are complete",

@@ -70,6 +70,7 @@ class ChinookSingularity(Singularity):
             f"#SBATCH --tasks-per-node={self.node_size}",
             f"#SBATCH --time={self._tasktime}",
             f"#SBATCH --output={_output}",
+            f"#SBATCH --partition={self.partition}", 
             f"#SBATCH --array=0-{self.ntask-1 % self.ntask_max}",
             f"{super().run_call_header}",  # Singularity wrapper
         ])

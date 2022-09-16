@@ -107,20 +107,21 @@ class Workstation:
                 f"Multi-core workflows (`nproc`>1) require an MPI executable " 
                 f"`mpiexec`"
             )
-        if self.mpiexec is not None:
-            # Make user that `mpiexec` exists on system
-            try:
-                stdout = subprocess.run(f"which {self.mpiexec}", shell=True,
-                                        check=True, text=True,
-                                        stdout=subprocess.PIPE).stdout
-            except subprocess.CalledProcessError:
-                logger.critical(
-                    f"MPI executable {self.mpiexec} was not found on system "
-                    f"with cmd: `which {self.mpiexec}. Please check that your "
-                    f"MPI module is loaded and accessible from the command line"
-                )
-                sys.exit(-1)
-            logger.debug(f"MPI executable is located at: {stdout.strip()}")
+        # !!! DOES NOT WORK ON CHINOOK SINGULARITY, OVERWRITE THERE
+        # if self.mpiexec is not None:
+        #     # Make user that `mpiexec` exists on system
+        #     try:
+        #         stdout = subprocess.run(f"which {self.mpiexec}", shell=True,
+        #                                 check=True, text=True,
+        #                                 stdout=subprocess.PIPE).stdout
+        #     except subprocess.CalledProcessError:
+        #         logger.critical(
+        #             f"MPI executable {self.mpiexec} was not found on system "
+        #             f"with cmd: `which {self.mpiexec}. Please check that your "
+        #             f"MPI module is loaded and accessible from the command line"
+        #         )
+        #         sys.exit(-1)
+        #     logger.debug(f"MPI executable is located at: {stdout.strip()}")
 
     def setup(self):
         """
