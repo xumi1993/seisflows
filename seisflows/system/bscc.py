@@ -27,8 +27,7 @@ class Bscc(Slurm):
         you can add it to the `_partitions` dictionary in the `__init__` method.
     :type submit_to: str
     :param submit_to: (Optional) partition to submit the main/master job which 
-        is a serial Python task that controls the workflow. Likely this should 
-        go on 'debug' for small jobs or 't1small' for mid-to-large jobs. If not
+        is a serial Python task that controls the workflow. If not
         given, defaults to `partition`.
 
     Paths
@@ -51,7 +50,7 @@ class Bscc(Slurm):
             self.slurm_args = self.slurm_args or ""
             self.slurm_args += f"--gpus={ngpus}"
         self._partitions = {"gpu_4090": 6, "v6_384": 96, "amd_a8_384": 128,
-                            "amd_a8_768": 140,
+                            "amd_a8_768": 128,
                             }
 
     @property
@@ -63,7 +62,6 @@ class Bscc(Slurm):
         """
         _call = " ".join([
             f"sbatch",
-            f"{self.slurm_args or ''}",
             f"--job-name={self.title}",
             f"--output={self.path.output_log}",
             f"--error={self.path.output_log}",
@@ -89,19 +87,11 @@ class Bscc(Slurm):
             f"--ntasks={self.nproc:d}",
             f"--partition={self.partition}",
             f"--time={tasktime}",
+            f"--array={array}",
+            f"--output={os.path.join(self.path.log_files, '%A_%a')}",
             f"--parsable",
+            f"{executable}"
         ]
-        if array != '0' and array is not None:
-            header += [
-                f"--array={array}",
-                f"--output={os.path.join(self.path.log_files, '%A_%a')}",
-            ]
-        else :
-            header += [
-                f"--output={self.path.output_log}",
-                f"--error={self.path.output_log}",
-            ]
-        header += [f"{executable}"]
         _call = " ".join(header)
         return _call
 
